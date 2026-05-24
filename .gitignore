@@ -8,3 +8,5 @@ build/
 .idea/
 local.properties
 .serena/
+.npmrc
+protocol/.npmrc
