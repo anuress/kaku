@@ -24,7 +24,7 @@ class NetworkInterceptor(private val emit: (KakuEvent) -> Unit) : Interceptor {
                     NetworkRequestPayload(
                         method = request.method,
                         url = request.url.toString(),
-                        headers = request.headers.names().associateWith { request.headers[it]!! },
+                        headers = request.headers.names().associateWith { request.headers[it].orEmpty() },
                     )
                 ),
             )
@@ -41,7 +41,7 @@ class NetworkInterceptor(private val emit: (KakuEvent) -> Unit) : Interceptor {
                 payload = Json.encodeToJsonElement(
                     NetworkResponsePayload(
                         statusCode = response.code,
-                        headers = response.headers.names().associateWith { response.headers[it]!! },
+                        headers = response.headers.names().associateWith { response.headers[it].orEmpty() },
                     )
                 ),
             )
