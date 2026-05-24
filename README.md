@@ -27,6 +27,25 @@ Events are typed JSON envelopes with a `plugin` namespace, `type`, correlation `
 
 ## Getting started
 
+### Protocol types (npm)
+
+If you're building a UI client in TypeScript, install the shared protocol types:
+
+```bash
+npm install @anuress/kaku-protocol
+```
+
+```ts
+import type { KakuEvent } from "@anuress/kaku-protocol"
+
+const ws = new WebSocket("ws://localhost:8766")
+
+ws.onmessage = (e) => {
+  const event = JSON.parse(e.data) as KakuEvent
+  console.log(event.plugin, event.type, event.payload)
+}
+```
+
 ### Server
 
 Requires [Bun](https://bun.sh).
@@ -63,9 +82,17 @@ implementation("com.github.anuress.kaku:kaku-network:VERSION") // optional
 Initialize in your `Application`:
 
 ```kotlin
-Kaku.init {
-    register(networkPlugin)
-    // serverUrl = "ws://10.0.2.2:8765"  // emulator override
+class MyApp : Application() {
+    private val networkPlugin = NetworkPlugin()
+
+    override fun onCreate() {
+        super.onCreate()
+
+        Kaku.init {
+            register(networkPlugin)
+            // serverUrl = "ws://10.0.2.2:8765"  // emulator override
+        }
+    }
 }
 ```
 
