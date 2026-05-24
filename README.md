@@ -139,6 +139,5 @@ kaku/
 
 ## Roadmap
 
-- **v2** — Inbound commands from UI to device (`KakuCommand`), per-device routing, WiFi support with TLS
+- **KakuCommand** — inbound command path from UI to device, enabling interactive debugging beyond observability
 - **iOS SDK** — KMP transport, Swift entry point
-- **Plugin registry** — typed payload schema declaration for UI codegen
