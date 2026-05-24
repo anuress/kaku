@@ -32,5 +32,5 @@ jobs:
         working-directory: protocol
 
       - name: Publish
-        run: npm publish --access public
+        run: npm publish --provenance
         working-directory: protocol
