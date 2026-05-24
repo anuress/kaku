@@ -1,4 +1,4 @@
-name: Publish @anuress/kaku-protocol
+name: kaku-protocol
 
 on:
   push:
