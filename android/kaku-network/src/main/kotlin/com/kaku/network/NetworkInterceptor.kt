@@ -7,6 +7,7 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import java.util.UUID
 
+// Captures all headers including Authorization — do not use in production builds
 class NetworkInterceptor(private val emit: (KakuEvent) -> Unit) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -35,7 +36,7 @@ class NetworkInterceptor(private val emit: (KakuEvent) -> Unit) : Interceptor {
             KakuEvent(
                 plugin = "network",
                 type = "response",
-                id = UUID.randomUUID().toString(),
+                id = requestId,
                 timestamp = System.currentTimeMillis(),
                 payload = Json.encodeToJsonElement(
                     NetworkResponsePayload(

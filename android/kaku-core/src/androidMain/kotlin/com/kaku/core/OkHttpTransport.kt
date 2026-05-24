@@ -17,6 +17,8 @@ private class OkHttpTransport : KakuTransport {
     private var webSocket: WebSocket? = null
 
     override fun connect(url: String, listener: KakuTransportListener) {
+        webSocket?.close(1000, "reconnecting")
+        webSocket = null
         val request = Request.Builder().url(url).build()
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) =

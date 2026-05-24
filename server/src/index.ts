@@ -35,7 +35,7 @@ Bun.serve({
         devices.handleHello(ws, msg as unknown as HelloMessage)
         return
       }
-      router.dispatch(data.toString())
+      router.dispatch(msg)
     },
     close(ws) {
       devices.remove(ws)

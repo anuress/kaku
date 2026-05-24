@@ -9,37 +9,25 @@ describe("Router", () => {
     uiClients.broadcast = broadcast
 
     const router = new Router(uiClients)
-    const raw = JSON.stringify({
+    router.dispatch({
       plugin: "network",
       type: "request",
       id: "abc",
       timestamp: 1000,
       payload: { url: "https://example.com" },
     })
-    router.dispatch(raw)
 
     expect(broadcast).toHaveBeenCalledTimes(1)
     expect(broadcast.mock.calls[0][0].plugin).toBe("network")
   })
 
-  test("ignores hello messages (not forwarded to UI)", () => {
+  test("ignores messages missing required fields", () => {
     const uiClients = new UIClientRegistry()
     const broadcast = mock(() => {})
     uiClients.broadcast = broadcast
 
     const router = new Router(uiClients)
-    router.dispatch(JSON.stringify({ type: "hello", platform: "android", sdkVersion: 1, plugins: [] }))
-
-    expect(broadcast).not.toHaveBeenCalled()
-  })
-
-  test("ignores malformed messages", () => {
-    const uiClients = new UIClientRegistry()
-    const broadcast = mock(() => {})
-    uiClients.broadcast = broadcast
-
-    const router = new Router(uiClients)
-    router.dispatch("not-json")
+    router.dispatch({ type: "request", id: "abc" }) // missing plugin
 
     expect(broadcast).not.toHaveBeenCalled()
   })

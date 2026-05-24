@@ -12,4 +12,8 @@ class NetworkPlugin : KakuPlugin {
     override fun onRegistered(emitter: KakuEmitter) {
         this.emitter = emitter
     }
+
+    override fun onDisconnected() {
+        emitter = null
+    }
 }

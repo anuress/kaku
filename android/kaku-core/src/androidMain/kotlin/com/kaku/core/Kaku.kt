@@ -1,11 +1,9 @@
 package com.kaku.core
 
-import android.content.Context
-
 object Kaku {
     @Volatile private var client: KakuClient? = null
 
-    fun init(context: Context, block: KakuBuilder.() -> Unit) {
+    fun init(block: KakuBuilder.() -> Unit) {
         val builder = KakuBuilder()
         builder.block()
         val instance = KakuClient()

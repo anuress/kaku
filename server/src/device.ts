@@ -25,6 +25,7 @@ export class DeviceRegistry {
     this.devices.delete(ws)
   }
 
+  // Reserved for future per-device command routing (v2)
   get(ws: ServerWebSocket): Device | undefined {
     return this.devices.get(ws)
   }

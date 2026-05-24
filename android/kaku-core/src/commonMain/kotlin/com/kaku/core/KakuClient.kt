@@ -2,6 +2,7 @@ package com.kaku.core
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -13,9 +14,10 @@ class KakuClient internal constructor(
     private val transport: KakuTransport = createTransport(),
 ) {
     private val plugins = mutableListOf<KakuPlugin>()
-    private val scope = CoroutineScope(Dispatchers.Default)
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var serverUrl = "ws://localhost:8765"
     private var reconnectAttempts = 0
+    private var emittersInitialized = false
 
     fun register(plugin: KakuPlugin) {
         plugins.add(plugin)
@@ -33,11 +35,17 @@ class KakuClient internal constructor(
         transport.connect(serverUrl, object : KakuTransportListener {
             override fun onConnected() {
                 reconnectAttempts = 0
-                setupEmitters()
+                if (!emittersInitialized) {
+                    setupEmitters()
+                    emittersInitialized = true
+                }
                 sendHello()
             }
             override fun onMessage(message: String) {}
-            override fun onDisconnected() { scheduleReconnect() }
+            override fun onDisconnected() {
+                plugins.forEach { it.onDisconnected() }
+                scheduleReconnect()
+            }
             override fun onError(error: Throwable) { scheduleReconnect() }
         })
     }
