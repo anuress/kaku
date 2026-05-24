@@ -27,26 +27,7 @@ Events are typed JSON envelopes with a `plugin` namespace, `type`, correlation `
 
 ## Getting started
 
-### Protocol types (npm)
-
-If you're building a UI client in TypeScript, install the shared protocol types:
-
-```bash
-npm install @anuress/kaku-protocol
-```
-
-```ts
-import type { KakuEvent } from "@anuress/kaku-protocol"
-
-const ws = new WebSocket("ws://localhost:8766")
-
-ws.onmessage = (e) => {
-  const event = JSON.parse(e.data) as KakuEvent
-  console.log(event.plugin, event.type, event.payload)
-}
-```
-
-### Server
+### 1. Start the server
 
 Requires [Bun](https://bun.sh).
 
@@ -62,7 +43,9 @@ bun run src/index.ts
 [kaku]   UI      → ws://127.0.0.1:8766
 ```
 
-### Android SDK
+### 2. Integrate the Android SDK
+
+Find the latest version on [JitPack](https://jitpack.io/#anuress/kaku) or [GitHub Releases](https://github.com/anuress/kaku/releases).
 
 ```kotlin
 // settings.gradle.kts
@@ -75,11 +58,11 @@ dependencyResolutionManagement {
 
 ```kotlin
 // build.gradle.kts
-implementation("com.github.anuress.kaku:kaku-core:VERSION")
-implementation("com.github.anuress.kaku:kaku-network:VERSION") // optional
+implementation("com.github.anuress.kaku:kaku-core:<version>")
+implementation("com.github.anuress.kaku:kaku-network:<version>") // optional
 ```
 
-Initialize in your `Application`:
+Wire it up in your `Application`:
 
 ```kotlin
 class MyApp : Application() {
@@ -98,6 +81,25 @@ class MyApp : Application() {
 
 See [kaku-network](android/kaku-network/README.md) for full network plugin setup and event reference.
 
+### 3. Build a UI client (optional)
+
+Connect to `ws://localhost:8766` and filter the event stream by `plugin`. If you're using TypeScript, install the shared types:
+
+```bash
+npm install @anuress/kaku-protocol
+```
+
+```ts
+import type { KakuEvent } from "@anuress/kaku-protocol"
+
+const ws = new WebSocket("ws://localhost:8766")
+
+ws.onmessage = (e) => {
+  const event = JSON.parse(e.data) as KakuEvent
+  console.log(event.plugin, event.type, event.payload)
+}
+```
+
 ---
 
 ## Plugins
@@ -115,6 +117,7 @@ class MyPlugin : KakuPlugin {
     override val id = "my-plugin"
     private var emitter: KakuEmitter? = null
 
+    // Your own hook/callback — wire this into whatever you want to observe
     val hook = MyHook { data ->
         emitter?.emit(
             KakuEvent(
@@ -132,7 +135,7 @@ class MyPlugin : KakuPlugin {
 }
 ```
 
-The plugin vends the hook; the app developer wires it manually. For a UI client: connect to `ws://localhost:8766` and filter events by `plugin` field.
+The plugin owns the hook — you wire it into your existing client code. UI clients receive the event on `ws://localhost:8766` and can filter by the `plugin` field.
 
 ---
 
