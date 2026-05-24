@@ -1,0 +1,6 @@
+jdk:
+  - openjdk17
+before_install:
+  - chmod +x android/gradlew
+install:
+  - cd android && ./gradlew :kaku-core:publishToMavenLocal :kaku-network:publishToMavenLocal
