@@ -1,0 +1,25 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "kaku",
+    },
+    "protocol": {
+      "name": "kaku-protocol",
+      "version": "0.1.0",
+    },
+    "server": {
+      "name": "kaku-server",
+      "version": "0.1.0",
+      "dependencies": {
+        "kaku-protocol": "workspace:*",
+      },
+    },
+  },
+  "packages": {
+    "kaku-protocol": ["kaku-protocol@workspace:protocol"],
+
+    "kaku-server": ["kaku-server@workspace:server"],
+  }
+}
