@@ -42,45 +42,39 @@ bun run src/index.ts
 
 ### Android SDK
 
-Add the dependencies to your app (local Maven or source):
+```kotlin
+// settings.gradle.kts
+dependencyResolutionManagement {
+    repositories {
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+```
 
 ```kotlin
 // build.gradle.kts
-implementation(project(":kaku-core"))
-implementation(project(":kaku-network")) // optional
+implementation("com.github.anuress.kaku:kaku-core:VERSION")
+implementation("com.github.anuress.kaku:kaku-network:VERSION") // optional
 ```
 
 Initialize in your `Application`:
 
 ```kotlin
-class MyApp : Application() {
-    val networkPlugin = NetworkPlugin()
-
-    override fun onCreate() {
-        super.onCreate()
-
-        Kaku.init {
-            register(networkPlugin)
-            // serverUrl = "ws://10.0.2.2:8765"  // emulator override
-        }
-
-        // Wire your OkHttpClient
-        val okHttp = OkHttpClient.Builder()
-            .addInterceptor(networkPlugin.interceptor)
-            .build()
-    }
+Kaku.init {
+    register(networkPlugin)
+    // serverUrl = "ws://10.0.2.2:8765"  // emulator override
 }
 ```
+
+See [kaku-network](android/kaku-network/README.md) for full network plugin setup and event reference.
 
 ---
 
 ## Plugins
 
-### Built-in: `kaku-network`
+### Built-in: [`kaku-network`](android/kaku-network/README.md)
 
-Captures OkHttp request/response pairs including headers and body (text content types up to 256 KB; binary is skipped).
-
-Event types: `request`, `response` — correlated by shared `id`.
+OkHttp interceptor that captures request/response pairs — method, URL, headers, and body. See its README for installation and event schema.
 
 ### Writing your own
 
@@ -108,9 +102,7 @@ class MyPlugin : KakuPlugin {
 }
 ```
 
-The plugin vends the hook; the app developer wires it manually. kaku does not install hooks into the app. See `docs/superpowers/plugin-authoring.md` for the full mental model.
-
-For a UI client: connect to `ws://localhost:8766` and filter events by `plugin` field.
+The plugin vends the hook; the app developer wires it manually. For a UI client: connect to `ws://localhost:8766` and filter events by `plugin` field.
 
 ---
 
