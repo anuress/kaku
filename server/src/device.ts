@@ -1,5 +1,5 @@
 import type { ServerWebSocket } from "bun"
-import type { HelloMessage } from "kaku-protocol"
+import type { HelloMessage } from "@anuress/kaku-protocol"
 
 interface Device {
   ws: ServerWebSocket

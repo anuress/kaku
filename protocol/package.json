@@ -1,7 +1,30 @@
 {
-  "name": "kaku-protocol",
+  "name": "@anuress/kaku-protocol",
   "version": "0.1.0",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "private": true
+  "description": "Shared protocol types for kaku — the mobile app debug engine",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anuress/kaku.git",
+    "directory": "protocol"
+  },
+  "license": "MIT"
 }

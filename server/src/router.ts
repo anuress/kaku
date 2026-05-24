@@ -1,4 +1,4 @@
-import type { KakuEvent } from "kaku-protocol"
+import type { KakuEvent } from "@anuress/kaku-protocol"
 import type { UIClientRegistry } from "./ui"
 
 export class Router {

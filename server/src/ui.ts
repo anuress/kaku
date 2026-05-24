@@ -1,5 +1,5 @@
 import type { ServerWebSocket } from "bun"
-import type { KakuEvent } from "kaku-protocol"
+import type { KakuEvent } from "@anuress/kaku-protocol"
 
 export class UIClientRegistry {
   private clients = new Set<ServerWebSocket>()

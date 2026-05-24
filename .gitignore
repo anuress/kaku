@@ -1,5 +1,6 @@
 node_modules/
 dist/
+protocol/dist/
 .DS_Store
 *.gradle
 .gradle/

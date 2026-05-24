@@ -3,7 +3,7 @@ import { DeviceRegistry } from "./device"
 import { UIClientRegistry } from "./ui"
 import { Router } from "./router"
 import { setupAdbReverse } from "./adb"
-import type { HelloMessage } from "kaku-protocol"
+import type { HelloMessage } from "@anuress/kaku-protocol"
 
 const devices = new DeviceRegistry()
 const uiClients = new UIClientRegistry()
