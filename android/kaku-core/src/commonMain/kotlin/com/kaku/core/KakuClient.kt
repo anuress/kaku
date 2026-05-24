@@ -3,6 +3,7 @@ package com.kaku.core
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -46,7 +47,10 @@ class KakuClient internal constructor(
                 plugins.forEach { it.onDisconnected() }
                 scheduleReconnect()
             }
-            override fun onError(error: Throwable) { scheduleReconnect() }
+            override fun onError(error: Throwable) {
+                plugins.forEach { it.onDisconnected() }
+                scheduleReconnect()
+            }
         })
     }
 
@@ -67,6 +71,11 @@ class KakuClient internal constructor(
             plugins = plugins.map { it.id },
         )
         transport.send(json.encodeToString(hello))
+    }
+
+    fun close() {
+        scope.cancel()
+        transport.disconnect()
     }
 
     private fun scheduleReconnect() {

@@ -31,4 +31,15 @@ describe("Router", () => {
 
     expect(broadcast).not.toHaveBeenCalled()
   })
+
+  test("does not forward hello messages (no plugin field)", () => {
+    const uiClients = new UIClientRegistry()
+    const broadcast = mock(() => {})
+    uiClients.broadcast = broadcast
+
+    const router = new Router(uiClients)
+    router.dispatch({ type: "hello", platform: "android", sdkVersion: 1, plugins: [] })
+
+    expect(broadcast).not.toHaveBeenCalled()
+  })
 })

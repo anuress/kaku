@@ -18,6 +18,34 @@ class KakuClientTest {
     }
 
     @Test
+    fun `notifies plugins on clean disconnect`() {
+        val transport = FakeTransport()
+        val client = KakuClient(transport)
+        val plugin = FakePlugin("network")
+        client.register(plugin)
+        client.startForTest("ws://localhost:8765")
+        transport.simulateConnected()
+
+        transport.simulateDisconnected()
+
+        assertTrue(plugin.disconnectedCalled)
+    }
+
+    @Test
+    fun `notifies plugins on connection error`() {
+        val transport = FakeTransport()
+        val client = KakuClient(transport)
+        val plugin = FakePlugin("network")
+        client.register(plugin)
+        client.startForTest("ws://localhost:8765")
+        transport.simulateConnected()
+
+        transport.simulateError()
+
+        assertTrue(plugin.disconnectedCalled)
+    }
+
+    @Test
     fun `sends hello with plugin ids on connect`() {
         val transport = FakeTransport()
         val client = KakuClient(transport)
@@ -47,9 +75,12 @@ internal class FakeTransport : KakuTransport {
 
     fun simulateConnected() = listener?.onConnected()
     fun simulateDisconnected() = listener?.onDisconnected()
+    fun simulateError(t: Throwable = RuntimeException("network error")) = listener?.onError(t)
 }
 
 internal class FakePlugin(override val id: String) : KakuPlugin {
     var emitterSet = false
+    var disconnectedCalled = false
     override fun onRegistered(emitter: KakuEmitter) { emitterSet = true }
+    override fun onDisconnected() { disconnectedCalled = true }
 }

@@ -3,7 +3,6 @@ package com.kaku.network
 import com.kaku.core.KakuEmitter
 import com.kaku.core.KakuEvent
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import okhttp3.OkHttpClient
 import okhttp3.Request
