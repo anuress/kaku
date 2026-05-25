@@ -12,8 +12,8 @@ kaku is an engine, not a tool. You build tools on top of it.
 ## How it works
 
 ```
-Android app                 kaku server              UI client
-───────────                 ───────────              ─────────
+Mobile app                  kaku server              UI client
+──────────                  ───────────              ─────────
 SDK + plugins  ──ws:8765──► event broker ──ws:8766──► web / TUI / Electron
 ```
 
@@ -43,7 +43,11 @@ bun run src/index.ts
 [kaku]   UI      → ws://127.0.0.1:8766
 ```
 
-### 2. Integrate the Android SDK
+### 2. Integrate a device SDK
+
+Choose the SDK for your platform:
+
+#### Android
 
 Find the latest version on [JitPack](https://jitpack.io/#anuress/kaku) or [GitHub Releases](https://github.com/anuress/kaku/releases).
 
@@ -80,6 +84,10 @@ class MyApp : Application() {
 ```
 
 See [kaku-network](android/kaku-network/README.md) for full network plugin setup and event reference.
+
+#### iOS
+
+Coming soon.
 
 ### 3. Build a UI client (optional)
 
@@ -163,10 +171,10 @@ kaku/
 | Layer | Technology |
 |-------|-----------|
 | Server | TypeScript + [Bun](https://bun.sh) |
-| Android SDK | Kotlin Multiplatform (KMP) |
+| Device SDK | Kotlin Multiplatform (KMP) |
 | Transport | OkHttp WebSocket (Android) |
 | Protocol | JSON over WebSocket |
-| Serialization | kotlinx.serialization (Android), native JSON (server) |
+| Serialization | kotlinx.serialization (device), native JSON (server) |
 
 ---
 
