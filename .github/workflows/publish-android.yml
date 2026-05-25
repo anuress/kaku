@@ -3,7 +3,7 @@ name: publish-android
 on:
   push:
     tags:
-      - "v*"
+      - "android/v*"
 
 jobs:
   publish:
@@ -23,8 +23,12 @@ jobs:
         run: ./gradlew :kaku-core:build :kaku-network:build
         working-directory: android
 
+      - name: Extract version
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#android/}" >> $GITHUB_OUTPUT
+
       - name: Upload kaku-core AAR
         uses: actions/upload-artifact@v4
         with:
-          name: kaku-core-${{ github.ref_name }}
+          name: kaku-core-${{ steps.version.outputs.version }}
           path: android/kaku-core/build/outputs/aar/kaku-core-release.aar
