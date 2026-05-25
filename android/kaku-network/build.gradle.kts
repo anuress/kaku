@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
@@ -13,8 +15,10 @@ android {
     defaultConfig { minSdk = 21 }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions { jvmTarget = "1.8" }
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_1_8)
+    }
 }
 
 afterEvaluate {

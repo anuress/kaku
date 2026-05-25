@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
@@ -9,9 +11,10 @@ group = "com.github.anuress.kaku"
 
 kotlin {
     androidTarget {
-        compilations.all {
-            kotlinOptions { jvmTarget = "1.8" }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_1_8)
         }
+        publishLibraryVariants("release")
     }
 
     sourceSets {
