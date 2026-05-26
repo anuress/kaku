@@ -3,15 +3,14 @@ import { DeviceRegistry } from "./device"
 import { UIClientRegistry } from "./ui"
 import { Router } from "./router"
 import { setupAdbReverse } from "./adb"
-import type { HelloMessage } from "@anuress/kaku-protocol"
+import type { HelloMessage, KakuCommand } from "@anuress/kaku-protocol"
 
 const devices = new DeviceRegistry()
 const uiClients = new UIClientRegistry()
-const router = new Router(uiClients)
+const router = new Router(uiClients, devices)
 
 setupAdbReverse()
 
-// Device server — Android/iOS SDK connects here
 Bun.serve({
   port: DEVICE_PORT,
   hostname: HOST,
@@ -32,7 +31,8 @@ Bun.serve({
         return
       }
       if (msg.type === "hello") {
-        devices.handleHello(ws, msg as unknown as HelloMessage)
+        const deviceId = devices.handleHello(ws, msg as unknown as HelloMessage)
+        ws.send(JSON.stringify({ type: "hello_ack", deviceId }))
         return
       }
       router.dispatch(msg)
@@ -44,7 +44,6 @@ Bun.serve({
   },
 })
 
-// UI server — web/TUI/Electron clients connect here
 Bun.serve({
   port: UI_PORT,
   hostname: HOST,
@@ -59,7 +58,15 @@ Bun.serve({
       console.log(`[kaku] UI client connected`)
     },
     message(ws, data) {
-      // v2: handle commands from UI to device
+      let msg: Record<string, unknown>
+      try {
+        msg = JSON.parse(data.toString())
+      } catch {
+        return
+      }
+      if (msg.deviceId && msg.plugin && msg.type && msg.id) {
+        router.routeCommand(msg as unknown as KakuCommand)
+      }
     },
     close(ws) {
       uiClients.remove(ws)
