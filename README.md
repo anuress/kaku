@@ -66,6 +66,25 @@ implementation("com.github.anuress.kaku:kaku-core:<version>")
 implementation("com.github.anuress.kaku:kaku-network:<version>") // optional
 ```
 
+**Android 9 (API 28)+** blocks cleartext traffic by default. Allow `ws://` to localhost by adding a network security config:
+
+```xml
+<!-- res/xml/network_security_config.xml -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+</network-security-config>
+```
+
+```xml
+<!-- AndroidManifest.xml -->
+<application
+    android:networkSecurityConfig="@xml/network_security_config"
+    ...>
+```
+
 Wire it up in your `Application`:
 
 ```kotlin
