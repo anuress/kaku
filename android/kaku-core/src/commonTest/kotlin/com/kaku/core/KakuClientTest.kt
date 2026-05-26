@@ -1,6 +1,7 @@
 package com.kaku.core
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class KakuClientTest {
@@ -60,9 +61,53 @@ class KakuClientTest {
         assertTrue(sent.contains("network"))
         assertTrue(sent.contains("loadtime"))
     }
+
+    @Test
+    fun `stores deviceId when hello_ack received`() {
+        val transport = FakeTransport()
+        val client = KakuClient(transport)
+        client.startForTest("ws://localhost:8765")
+        transport.simulateConnected()
+
+        transport.simulateMessage("""{"type":"hello_ack","deviceId":"device-abc"}""")
+
+        assertEquals("device-abc", client.deviceId)
+    }
+
+    @Test
+    fun `dispatches command to matching plugin`() {
+        val transport = FakeTransport()
+        val client = KakuClient(transport)
+        val plugin = FakePlugin("network")
+        client.register(plugin)
+        client.startForTest("ws://localhost:8765")
+        transport.simulateConnected()
+
+        transport.simulateMessage(
+            """{"plugin":"network","type":"clear","id":"cmd-1","timestamp":1000,"deviceId":"dev-1"}"""
+        )
+
+        assertEquals(1, plugin.receivedCommands.size)
+        assertEquals("clear", plugin.receivedCommands[0].type)
+    }
+
+    @Test
+    fun `ignores commands for unknown plugin`() {
+        val transport = FakeTransport()
+        val client = KakuClient(transport)
+        val plugin = FakePlugin("network")
+        client.register(plugin)
+        client.startForTest("ws://localhost:8765")
+        transport.simulateConnected()
+
+        transport.simulateMessage(
+            """{"plugin":"unknown","type":"clear","id":"cmd-1","timestamp":1000,"deviceId":"dev-1"}"""
+        )
+
+        assertEquals(0, plugin.receivedCommands.size)
+    }
 }
 
-// Test doubles
 internal class FakeTransport : KakuTransport {
     val sentMessages = mutableListOf<String>()
     private var listener: KakuTransportListener? = null
@@ -76,11 +121,14 @@ internal class FakeTransport : KakuTransport {
     fun simulateConnected() = listener?.onConnected()
     fun simulateDisconnected() = listener?.onDisconnected()
     fun simulateError(t: Throwable = RuntimeException("network error")) = listener?.onError(t)
+    fun simulateMessage(message: String) = listener?.onMessage(message)
 }
 
 internal class FakePlugin(override val id: String) : KakuPlugin {
     var emitterSet = false
     var disconnectedCalled = false
+    val receivedCommands = mutableListOf<KakuCommand>()
     override fun onRegistered(emitter: KakuEmitter) { emitterSet = true }
     override fun onDisconnected() { disconnectedCalled = true }
+    override fun onCommand(command: KakuCommand) { receivedCommands.add(command) }
 }

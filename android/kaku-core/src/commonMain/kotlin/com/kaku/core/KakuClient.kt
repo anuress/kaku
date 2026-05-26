@@ -8,8 +8,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
-private val json = Json { encodeDefaults = true }
+private val json = Json { encodeDefaults = true; ignoreUnknownKeys = true }
 
 class KakuClient internal constructor(
     private val transport: KakuTransport = createTransport(),
@@ -19,6 +24,7 @@ class KakuClient internal constructor(
     private var serverUrl = "ws://localhost:8765"
     private var reconnectAttempts = 0
     private var emittersInitialized = false
+    internal var deviceId: String? = null
 
     fun register(plugin: KakuPlugin) {
         plugins.add(plugin)
@@ -42,7 +48,7 @@ class KakuClient internal constructor(
                 }
                 sendHello()
             }
-            override fun onMessage(message: String) {}
+            override fun onMessage(message: String) = handleMessage(message)
             override fun onDisconnected() {
                 plugins.forEach { it.onDisconnected() }
                 scheduleReconnect()
@@ -52,6 +58,27 @@ class KakuClient internal constructor(
                 scheduleReconnect()
             }
         })
+    }
+
+    private fun handleMessage(message: String) {
+        val obj = try {
+            json.parseToJsonElement(message).jsonObject
+        } catch (e: Exception) {
+            return
+        }
+        when (obj["type"]?.jsonPrimitive?.contentOrNull) {
+            "hello_ack" -> {
+                deviceId = obj["deviceId"]?.jsonPrimitive?.contentOrNull ?: return
+            }
+            else -> {
+                val cmd = try {
+                    json.decodeFromJsonElement<KakuCommand>(obj)
+                } catch (e: Exception) {
+                    return
+                }
+                plugins.find { it.id == cmd.plugin }?.onCommand(cmd)
+            }
+        }
     }
 
     private fun setupEmitters() {
