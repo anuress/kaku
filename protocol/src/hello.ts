@@ -4,3 +4,8 @@ export interface HelloMessage {
   sdkVersion: number
   plugins: string[]
 }
+
+export interface HelloAckMessage {
+  type: "hello_ack"
+  deviceId: string
+}
