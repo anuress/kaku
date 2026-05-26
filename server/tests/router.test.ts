@@ -1,6 +1,12 @@
 import { describe, test, expect, mock } from "bun:test"
 import { Router } from "../src/router"
 import { UIClientRegistry } from "../src/ui"
+import { DeviceRegistry } from "../src/device"
+import type { KakuCommand } from "@anuress/kaku-protocol"
+
+function makeDevices() {
+  return new DeviceRegistry()
+}
 
 describe("Router", () => {
   test("forwards valid event to UI clients", () => {
@@ -8,7 +14,7 @@ describe("Router", () => {
     const broadcast = mock(() => {})
     uiClients.broadcast = broadcast
 
-    const router = new Router(uiClients)
+    const router = new Router(uiClients, makeDevices())
     router.dispatch({
       plugin: "network",
       type: "request",
@@ -26,7 +32,7 @@ describe("Router", () => {
     const broadcast = mock(() => {})
     uiClients.broadcast = broadcast
 
-    const router = new Router(uiClients)
+    const router = new Router(uiClients, makeDevices())
     router.dispatch({ type: "request", id: "abc" }) // missing plugin
 
     expect(broadcast).not.toHaveBeenCalled()
@@ -37,9 +43,52 @@ describe("Router", () => {
     const broadcast = mock(() => {})
     uiClients.broadcast = broadcast
 
-    const router = new Router(uiClients)
+    const router = new Router(uiClients, makeDevices())
     router.dispatch({ type: "hello", platform: "android", sdkVersion: 1, plugins: [] })
 
     expect(broadcast).not.toHaveBeenCalled()
+  })
+
+  test("routeCommand forwards command to correct device", () => {
+    const uiClients = new UIClientRegistry()
+    const devices = new DeviceRegistry()
+    const send = mock(() => {})
+    const ws = { send } as any
+    const deviceId = devices.handleHello(ws, {
+      type: "hello",
+      platform: "android",
+      sdkVersion: 1,
+      plugins: [],
+    })
+
+    const router = new Router(uiClients, devices)
+    const cmd: KakuCommand = {
+      plugin: "network",
+      type: "clear",
+      id: "cmd-1",
+      timestamp: 1000,
+      payload: {},
+      deviceId,
+    }
+    router.routeCommand(cmd)
+
+    expect(send).toHaveBeenCalledTimes(1)
+    const sent = JSON.parse(send.mock.calls[0][0])
+    expect(sent.type).toBe("clear")
+    expect(sent.plugin).toBe("network")
+  })
+
+  test("routeCommand silently drops command for unknown deviceId", () => {
+    const uiClients = new UIClientRegistry()
+    const router = new Router(uiClients, makeDevices())
+    const cmd: KakuCommand = {
+      plugin: "network",
+      type: "clear",
+      id: "cmd-1",
+      timestamp: 1000,
+      payload: {},
+      deviceId: "nonexistent",
+    }
+    expect(() => router.routeCommand(cmd)).not.toThrow()
   })
 })
