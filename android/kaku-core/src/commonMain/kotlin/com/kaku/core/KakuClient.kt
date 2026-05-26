@@ -41,6 +41,7 @@ class KakuClient internal constructor(
         transport.connect(serverUrl, object : KakuTransportListener {
             override fun onConnected() {
                 reconnectAttempts = 0
+                deviceId = null
                 if (!emittersInitialized) {
                     setupEmitters()
                     emittersInitialized = true
@@ -67,7 +68,12 @@ class KakuClient internal constructor(
         }
         when (obj["type"]?.jsonPrimitive?.contentOrNull) {
             "hello_ack" -> {
-                deviceId = obj["deviceId"]?.jsonPrimitive?.contentOrNull ?: return
+                val ack = try {
+                    json.decodeFromJsonElement<HelloAckMessage>(obj)
+                } catch (e: Exception) {
+                    return
+                }
+                deviceId = ack.deviceId
             }
             else -> {
                 val cmd = try {
