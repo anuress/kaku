@@ -1,6 +1,6 @@
 {
   "name": "@anuress/kaku-protocol",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Shared protocol types for kaku — the mobile app debug engine",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
