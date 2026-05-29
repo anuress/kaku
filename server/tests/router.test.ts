@@ -21,10 +21,11 @@ describe("Router", () => {
       id: "abc",
       timestamp: 1000,
       payload: { url: "https://example.com" },
-    })
+    }, "device-1")
 
     expect(broadcast).toHaveBeenCalledTimes(1)
     expect(broadcast.mock.calls[0][0].plugin).toBe("network")
+    expect(broadcast.mock.calls[0][0].deviceId).toBe("device-1")
   })
 
   test("ignores messages missing required fields", () => {
@@ -33,7 +34,7 @@ describe("Router", () => {
     uiClients.broadcast = broadcast
 
     const router = new Router(uiClients, makeDevices())
-    router.dispatch({ type: "request", id: "abc" }) // missing plugin
+    router.dispatch({ type: "request", id: "abc" }, "device-1") // missing plugin
 
     expect(broadcast).not.toHaveBeenCalled()
   })
@@ -44,7 +45,7 @@ describe("Router", () => {
     uiClients.broadcast = broadcast
 
     const router = new Router(uiClients, makeDevices())
-    router.dispatch({ type: "hello", platform: "android", sdkVersion: 1, plugins: [] })
+    router.dispatch({ type: "hello", platform: "android", sdkVersion: 1, plugins: [] }, "device-1")
 
     expect(broadcast).not.toHaveBeenCalled()
   })

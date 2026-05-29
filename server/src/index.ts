@@ -35,7 +35,9 @@ Bun.serve({
         ws.send(JSON.stringify({ type: "hello_ack", deviceId }))
         return
       }
-      router.dispatch(msg)
+      const device = devices.get(ws)
+      if (!device) return
+      router.dispatch(msg, device.deviceId)
     },
     close(ws) {
       devices.remove(ws)

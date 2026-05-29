@@ -8,9 +8,9 @@ export class Router {
     private devices: DeviceRegistry,
   ) {}
 
-  dispatch(msg: Record<string, unknown>): void {
+  dispatch(msg: Record<string, unknown>, deviceId: string): void {
     if (!msg.plugin || !msg.type || !msg.id) return
-    this.uiClients.broadcast(msg as KakuEvent)
+    this.uiClients.broadcast({ ...msg, deviceId } as KakuEvent)
   }
 
   routeCommand(cmd: KakuCommand): void {
