@@ -9,3 +9,7 @@ export interface HelloAckMessage {
   type: "hello_ack"
   deviceId: string
 }
+
+export interface ReconnectMessage {
+  type: "reconnect"
+}
