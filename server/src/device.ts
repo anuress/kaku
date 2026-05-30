@@ -47,4 +47,11 @@ export class DeviceRegistry {
   sendTo(deviceId: string, message: string): void {
     this.byId.get(deviceId)?.ws.send(message)
   }
+
+  reconnectAll(): void {
+    const msg = JSON.stringify({ type: "reconnect" })
+    for (const device of this.devices.values()) {
+      device.ws.send(msg)
+    }
+  }
 }

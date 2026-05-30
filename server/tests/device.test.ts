@@ -67,4 +67,24 @@ describe("DeviceRegistry", () => {
     registry.remove(ws)
     expect(registry.getByDeviceId(deviceId)).toBeUndefined()
   })
+
+  test("reconnectAll sends reconnect to all registered devices", () => {
+    const registry = new DeviceRegistry()
+    const send1 = mock(() => {})
+    const send2 = mock(() => {})
+    const ws1 = { send: send1 } as any
+    const ws2 = { send: send2 } as any
+    registry.handleHello(ws1, hello)
+    registry.handleHello(ws2, hello)
+
+    registry.reconnectAll()
+
+    expect(send1).toHaveBeenCalledWith('{"type":"reconnect"}')
+    expect(send2).toHaveBeenCalledWith('{"type":"reconnect"}')
+  })
+
+  test("reconnectAll does nothing when no devices are registered", () => {
+    const registry = new DeviceRegistry()
+    expect(() => registry.reconnectAll()).not.toThrow()
+  })
 })
