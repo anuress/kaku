@@ -57,6 +57,7 @@ Bun.serve({
   websocket: {
     open(ws) {
       uiClients.add(ws)
+      devices.reconnectAll()
       console.log(`[kaku] UI client connected`)
     },
     message(ws, data) {
