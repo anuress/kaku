@@ -1,6 +1,6 @@
 {
   "name": "@anuress/kaku-server",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Relay server for kaku — the mobile app debug engine",
   "type": "commonjs",
   "bin": { "kaku-server": "./dist/index.js" },
