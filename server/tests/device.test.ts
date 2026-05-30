@@ -87,4 +87,37 @@ describe("DeviceRegistry", () => {
     const registry = new DeviceRegistry()
     expect(() => registry.reconnectAll()).not.toThrow()
   })
+
+  test("list returns empty array when no devices", () => {
+    const registry = new DeviceRegistry()
+    expect(registry.list()).toEqual([])
+  })
+
+  test("list returns devices with id field not deviceId", () => {
+    const registry = new DeviceRegistry()
+    const ws = {} as any
+    const deviceId = registry.handleHello(ws, hello)
+    const [device] = registry.list()
+    expect(device.id).toBe(deviceId)
+    expect("deviceId" in device).toBe(false)
+  })
+
+  test("list includes platform, sdkVersion, plugins", () => {
+    const registry = new DeviceRegistry()
+    const ws = {} as any
+    registry.handleHello(ws, hello)
+    const [device] = registry.list()
+    expect(device.platform).toBe("android")
+    expect(device.sdkVersion).toBe(1)
+    expect(device.plugins).toEqual(["network"])
+  })
+
+  test("list reflects disconnects", () => {
+    const registry = new DeviceRegistry()
+    const ws = {} as any
+    registry.handleHello(ws, hello)
+    expect(registry.list()).toHaveLength(1)
+    registry.remove(ws)
+    expect(registry.list()).toHaveLength(0)
+  })
 })

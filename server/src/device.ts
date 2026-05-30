@@ -1,6 +1,13 @@
 import type { WebSocket } from "ws"
 import type { HelloMessage } from "@anuress/kaku-protocol"
 
+export interface DeviceInfo {
+  id: string
+  platform: string
+  sdkVersion: number
+  plugins: string[]
+}
+
 interface Device {
   ws: WebSocket
   platform: string
@@ -53,5 +60,14 @@ export class DeviceRegistry {
     for (const device of this.devices.values()) {
       device.ws.send(msg)
     }
+  }
+
+  list(): DeviceInfo[] {
+    return Array.from(this.byId.values()).map(({ deviceId, platform, sdkVersion, plugins }) => ({
+      id: deviceId,
+      platform,
+      sdkVersion,
+      plugins,
+    }))
   }
 }

@@ -33,6 +33,7 @@ deviceWss.on("connection", (ws: WebSocket) => {
     if (msg.type === "hello") {
       const deviceId = devices.handleHello(ws, msg as unknown as HelloMessage)
       ws.send(JSON.stringify({ type: "hello_ack", deviceId }))
+      uiClients.sendDeviceList(devices.list())
       return
     }
     const device = devices.get(ws)
@@ -42,6 +43,7 @@ deviceWss.on("connection", (ws: WebSocket) => {
 
   ws.on("close", () => {
     devices.remove(ws)
+    uiClients.sendDeviceList(devices.list())
     console.log(`[kaku] device ws disconnected`)
   })
 })
@@ -58,6 +60,7 @@ const uiWss = new WebSocketServer({ server: uiServer })
 uiWss.on("connection", (ws: WebSocket) => {
   uiClients.add(ws)
   devices.reconnectAll()
+  uiClients.sendDeviceList(devices.list())
   console.log(`[kaku] UI client connected`)
 
   ws.on("message", (data) => {

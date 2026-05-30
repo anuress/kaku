@@ -26,6 +26,26 @@ describe("UIClientRegistry", () => {
     expect(send2).toHaveBeenCalledWith(JSON.stringify(event))
   })
 
+  test("sendDeviceList broadcasts device-list message to all clients", () => {
+    const registry = new UIClientRegistry()
+    const send1 = mock(() => {})
+    const send2 = mock(() => {})
+    registry.add({ send: send1 } as any)
+    registry.add({ send: send2 } as any)
+    registry.sendDeviceList([{ id: "abc", platform: "android", sdkVersion: 1, plugins: ["network"] }])
+    const expected = JSON.stringify({ type: "device-list", devices: [{ id: "abc", platform: "android", sdkVersion: 1, plugins: ["network"] }] })
+    expect(send1).toHaveBeenCalledWith(expected)
+    expect(send2).toHaveBeenCalledWith(expected)
+  })
+
+  test("sendDeviceList with empty list sends empty devices array", () => {
+    const registry = new UIClientRegistry()
+    const send = mock(() => {})
+    registry.add({ send } as any)
+    registry.sendDeviceList([])
+    expect(send).toHaveBeenCalledWith('{"type":"device-list","devices":[]}')
+  })
+
   test("does not broadcast to removed clients", () => {
     const registry = new UIClientRegistry()
     const send = mock(() => {})
