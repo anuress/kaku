@@ -106,17 +106,35 @@ class KakuClientTest {
 
         assertEquals(0, plugin.receivedCommands.size)
     }
+
+    @Test
+    fun `reconnects immediately when server sends reconnect command`() {
+        val transport = FakeTransport()
+        val client = KakuClient(transport)
+        client.startForTest("ws://localhost:8765")
+        transport.simulateConnected()
+        transport.simulateMessage("""{"type":"hello_ack","deviceId":"device-abc"}""")
+        val connectsBefore = transport.connectCount
+
+        transport.simulateMessage("""{"type":"reconnect"}""")
+
+        assertEquals(1, transport.disconnectCount)
+        assertEquals(connectsBefore + 1, transport.connectCount)
+    }
 }
 
 internal class FakeTransport : KakuTransport {
     val sentMessages = mutableListOf<String>()
+    var connectCount = 0
+    var disconnectCount = 0
     private var listener: KakuTransportListener? = null
 
     override fun connect(url: String, listener: KakuTransportListener) {
+        connectCount++
         this.listener = listener
     }
     override fun send(message: String) { sentMessages.add(message) }
-    override fun disconnect() {}
+    override fun disconnect() { disconnectCount++ }
 
     fun simulateConnected() = listener?.onConnected()
     fun simulateDisconnected() = listener?.onDisconnected()

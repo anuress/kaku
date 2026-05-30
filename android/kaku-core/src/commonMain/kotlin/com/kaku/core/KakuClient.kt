@@ -75,6 +75,10 @@ class KakuClient internal constructor(
                 }
                 deviceId = ack.deviceId
             }
+            "reconnect" -> {
+                transport.disconnect()
+                connect()
+            }
             else -> {
                 val cmd = try {
                     json.decodeFromJsonElement<KakuCommand>(obj)
