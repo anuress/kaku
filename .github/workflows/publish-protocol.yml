@@ -3,7 +3,7 @@ name: kaku-protocol
 on:
   push:
     tags:
-      - "protocol/v*"
+      - "protocol/[0-9]*"
 
 permissions:
   id-token: write
