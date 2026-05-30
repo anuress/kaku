@@ -51,7 +51,10 @@ class KakuClient internal constructor(
                 }
                 sendHello()
             }
-            override fun onMessage(message: String) = handleMessage(message)
+            override fun onMessage(message: String) {
+                if (listenerGeneration.get() != myGeneration) return
+                handleMessage(message)
+            }
             override fun onDisconnected() {
                 if (listenerGeneration.get() != myGeneration) return
                 plugins.forEach { it.onDisconnected() }
