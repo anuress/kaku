@@ -1,4 +1,4 @@
-name: publish-android
+name: kaku-android
 
 on:
   push:
