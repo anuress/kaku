@@ -1,6 +1,6 @@
 # kaku-network
 
-[![kaku-android](https://github.com/anuress/kaku/actions/workflows/publish-android.yml/badge.svg)](https://github.com/anuress/kaku/actions/workflows/publish-android.yml)
+[![kaku-android](https://github.com/anuress/kaku/actions/workflows/build-android.yml/badge.svg)](https://github.com/anuress/kaku/actions/workflows/build-android.yml)
 
 OkHttp network interceptor plugin for [kaku](https://github.com/anuress/kaku). Captures request and response pairs — method, URL, headers, and body — and streams them to any connected kaku UI client.
 
