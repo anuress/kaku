@@ -1,7 +1,7 @@
 # kaku (核)
 
-[![kaku-protocol](https://github.com/anuress/kaku/actions/workflows/publish-protocol.yml/badge.svg)](https://github.com/anuress/kaku/actions/workflows/publish-protocol.yml)
-[![kaku-android](https://github.com/anuress/kaku/actions/workflows/build-android.yml/badge.svg)](https://github.com/anuress/kaku/actions/workflows/build-android.yml)
+[![kaku-protocol](https://github.com/anuress/kaku/actions/workflows/publish-protocol.yml/badge.svg)](https://github.com/anuress/kaku/actions/workflows/publish-protocol.yml) [![npm](https://img.shields.io/npm/v/@anuress/kaku-protocol)](https://www.npmjs.com/package/@anuress/kaku-protocol)
+[![kaku-android](https://github.com/anuress/kaku/actions/workflows/publish-android.yml/badge.svg)](https://github.com/anuress/kaku/actions/workflows/publish-android.yml) [![](https://jitpack.io/v/anuress/kaku.svg)](https://jitpack.io/#anuress/kaku)
 
 A plugin-based debug engine for mobile apps. kaku runs a local WebSocket server that receives structured events from an Android SDK and broadcasts them to any connected UI client — web, TUI, Electron, or anything that speaks WebSocket.
 
