@@ -123,6 +123,41 @@ class KakuClientTest {
     }
 
     @Test
+    fun `stale listener onConnected after reconnect does not send hello or clear deviceId`() {
+        val transport = FakeTransport()
+        val client = KakuClient(transport)
+        client.startForTest("ws://localhost:8765")
+        transport.simulateConnected()
+        transport.simulateMessage("""{"type":"hello_ack","deviceId":"device-abc"}""")
+        val oldListener = transport.captureListener()
+        val helloCountAfterFirstConnect = transport.sentMessages.size
+
+        transport.simulateMessage("""{"type":"reconnect"}""")
+        // generation is now 2; old listener is stale
+
+        oldListener.onConnected()
+
+        assertEquals(helloCountAfterFirstConnect, transport.sentMessages.size)
+        assertEquals("device-abc", client.deviceId)
+    }
+
+    @Test
+    fun `onDisconnected and onError for same generation notify plugins only once`() {
+        val transport = FakeTransport()
+        val client = KakuClient(transport)
+        val plugin = FakePlugin("network")
+        client.register(plugin)
+        client.startForTest("ws://localhost:8765")
+        transport.simulateConnected()
+        val listener = transport.captureListener()
+
+        listener.onDisconnected()
+        listener.onError(RuntimeException("also failed"))
+
+        assertEquals(1, plugin.disconnectedCount)
+    }
+
+    @Test
     fun `stale listener onDisconnected after reconnect does not trigger scheduleReconnect`() {
         val transport = FakeTransport()
         val client = KakuClient(transport)
@@ -169,8 +204,9 @@ internal class FakeTransport : KakuTransport {
 internal class FakePlugin(override val id: String) : KakuPlugin {
     var emitterSet = false
     var disconnectedCalled = false
+    var disconnectedCount = 0
     val receivedCommands = mutableListOf<KakuCommand>()
     override fun onRegistered(emitter: KakuEmitter) { emitterSet = true }
-    override fun onDisconnected() { disconnectedCalled = true }
+    override fun onDisconnected() { disconnectedCalled = true; disconnectedCount++ }
     override fun onCommand(command: KakuCommand) { receivedCommands.add(command) }
 }

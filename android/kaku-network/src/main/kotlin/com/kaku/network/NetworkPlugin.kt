@@ -5,7 +5,7 @@ import com.kaku.core.KakuPlugin
 
 class NetworkPlugin : KakuPlugin {
     override val id = "network"
-    private var emitter: KakuEmitter? = null
+    @Volatile private var emitter: KakuEmitter? = null
 
     val interceptor = NetworkInterceptor { event -> emitter?.emit(event) }
 

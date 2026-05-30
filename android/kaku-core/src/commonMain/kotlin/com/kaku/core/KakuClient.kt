@@ -1,5 +1,6 @@
 package com.kaku.core
 
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,10 +23,11 @@ class KakuClient internal constructor(
     private val plugins = mutableListOf<KakuPlugin>()
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var serverUrl = "ws://localhost:8765"
-    private var reconnectAttempts = 0
-    private var emittersInitialized = false
+    @Volatile private var reconnectAttempts = 0
+    @Volatile private var emittersInitialized = false
     private val listenerGeneration = AtomicInteger(0)
-    internal var deviceId: String? = null
+    private val reconnectPending = AtomicBoolean(false)
+    @Volatile internal var deviceId: String? = null
 
     fun register(plugin: KakuPlugin) {
         plugins.add(plugin)
@@ -40,9 +42,11 @@ class KakuClient internal constructor(
     }
 
     private fun connect() {
+        reconnectPending.set(false)
         val myGeneration = listenerGeneration.incrementAndGet()
         transport.connect(serverUrl, object : KakuTransportListener {
             override fun onConnected() {
+                if (listenerGeneration.get() != myGeneration) return
                 reconnectAttempts = 0
                 deviceId = null
                 if (!emittersInitialized) {
@@ -57,13 +61,11 @@ class KakuClient internal constructor(
             }
             override fun onDisconnected() {
                 if (listenerGeneration.get() != myGeneration) return
-                plugins.forEach { it.onDisconnected() }
-                scheduleReconnect()
+                onSocketLost()
             }
             override fun onError(error: Throwable) {
                 if (listenerGeneration.get() != myGeneration) return
-                plugins.forEach { it.onDisconnected() }
-                scheduleReconnect()
+                onSocketLost()
             }
         })
     }
@@ -121,6 +123,12 @@ class KakuClient internal constructor(
     fun close() {
         scope.cancel()
         transport.disconnect()
+    }
+
+    private fun onSocketLost() {
+        if (!reconnectPending.compareAndSet(false, true)) return
+        plugins.forEach { it.onDisconnected() }
+        scheduleReconnect()
     }
 
     private fun scheduleReconnect() {
