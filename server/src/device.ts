@@ -1,8 +1,8 @@
-import type { ServerWebSocket } from "bun"
+import type { WebSocket } from "ws"
 import type { HelloMessage } from "@anuress/kaku-protocol"
 
 interface Device {
-  ws: ServerWebSocket
+  ws: WebSocket
   platform: string
   sdkVersion: number
   plugins: string[]
@@ -10,10 +10,10 @@ interface Device {
 }
 
 export class DeviceRegistry {
-  private devices = new Map<ServerWebSocket, Device>()
+  private devices = new Map<WebSocket, Device>()
   private byId = new Map<string, Device>()
 
-  handleHello(ws: ServerWebSocket, hello: HelloMessage): string {
+  handleHello(ws: WebSocket, hello: HelloMessage): string {
     const deviceId = crypto.randomUUID()
     const device: Device = {
       ws,
@@ -28,7 +28,7 @@ export class DeviceRegistry {
     return deviceId
   }
 
-  remove(ws: ServerWebSocket): void {
+  remove(ws: WebSocket): void {
     const device = this.devices.get(ws)
     if (device) {
       this.byId.delete(device.deviceId)
@@ -36,7 +36,7 @@ export class DeviceRegistry {
     }
   }
 
-  get(ws: ServerWebSocket): Device | undefined {
+  get(ws: WebSocket): Device | undefined {
     return this.devices.get(ws)
   }
 
