@@ -1,6 +1,7 @@
 # kaku (核)
 
 [![kaku-protocol](https://github.com/anuress/kaku/actions/workflows/publish-protocol.yml/badge.svg)](https://github.com/anuress/kaku/actions/workflows/publish-protocol.yml)
+[![kaku-server](https://github.com/anuress/kaku/actions/workflows/ci-server.yml/badge.svg)](https://github.com/anuress/kaku/actions/workflows/ci-server.yml)
 [![kaku-android](https://github.com/anuress/kaku/actions/workflows/build-android.yml/badge.svg)](https://github.com/anuress/kaku/actions/workflows/build-android.yml)
 
 A plugin-based debug engine for mobile apps. kaku runs a local WebSocket server that receives structured events from an Android SDK and broadcasts them to any connected UI client — web, TUI, Electron, or anything that speaks WebSocket.
@@ -29,12 +30,15 @@ Events are typed JSON envelopes with a `plugin` namespace, `type`, correlation `
 
 ### 1. Start the server
 
-Requires [Bun](https://bun.sh).
+```bash
+npx @anuress/kaku-server
+```
+
+Or install globally:
 
 ```bash
-cd server
-bun install
-bun run src/index.ts
+npm install -g @anuress/kaku-server
+kaku-server
 ```
 
 ```
@@ -171,7 +175,7 @@ The plugin owns the hook — you wire it into your existing client code. UI clie
 ```
 kaku/
 ├── protocol/          # Shared TypeScript types (KakuEvent, KakuCommand)
-├── server/            # Bun WebSocket broker
+├── server/            # Node.js WebSocket broker (@anuress/kaku-server)
 │   ├── src/
 │   │   ├── index.ts   # Server entry point
 │   │   ├── router.ts  # Event dispatch to UI clients
@@ -189,7 +193,7 @@ kaku/
 
 | Layer | Technology |
 |-------|-----------|
-| Server | TypeScript + [Bun](https://bun.sh) |
+| Server | TypeScript + Node.js ([`@anuress/kaku-server`](https://www.npmjs.com/package/@anuress/kaku-server)) |
 | Device SDK | Kotlin Multiplatform (KMP) |
 | Transport | OkHttp WebSocket (Android) |
 | Protocol | JSON over WebSocket |
