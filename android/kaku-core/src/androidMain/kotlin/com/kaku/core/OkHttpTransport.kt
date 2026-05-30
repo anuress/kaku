@@ -14,24 +14,30 @@ private class OkHttpTransport : KakuTransport {
         .readTimeout(0, TimeUnit.MILLISECONDS)
         .build()
 
-    private var webSocket: WebSocket? = null
+    @Volatile private var webSocket: WebSocket? = null
 
     override fun connect(url: String, listener: KakuTransportListener) {
-        webSocket?.close(1000, "reconnecting")
+        val old = webSocket
         webSocket = null
+        old?.close(1000, "reconnecting")
         val request = Request.Builder().url(url).build()
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
-            override fun onOpen(webSocket: WebSocket, response: Response) =
+            override fun onOpen(webSocket: WebSocket, response: Response) {
+                if (webSocket !== this@OkHttpTransport.webSocket) return
                 listener.onConnected()
-
-            override fun onMessage(webSocket: WebSocket, text: String) =
+            }
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                if (webSocket !== this@OkHttpTransport.webSocket) return
                 listener.onMessage(text)
-
-            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) =
+            }
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                if (webSocket !== this@OkHttpTransport.webSocket) return
                 listener.onDisconnected()
-
-            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) =
+            }
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                if (webSocket !== this@OkHttpTransport.webSocket) return
                 listener.onError(t)
+            }
         })
     }
 
