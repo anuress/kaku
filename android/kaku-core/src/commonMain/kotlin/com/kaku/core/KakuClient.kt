@@ -1,5 +1,6 @@
 package com.kaku.core
 
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,7 +24,7 @@ class KakuClient internal constructor(
     private var serverUrl = "ws://localhost:8765"
     private var reconnectAttempts = 0
     private var emittersInitialized = false
-    private var listenerGeneration = 0
+    private val listenerGeneration = AtomicInteger(0)
     internal var deviceId: String? = null
 
     fun register(plugin: KakuPlugin) {
@@ -39,7 +40,7 @@ class KakuClient internal constructor(
     }
 
     private fun connect() {
-        val myGeneration = ++listenerGeneration
+        val myGeneration = listenerGeneration.incrementAndGet()
         transport.connect(serverUrl, object : KakuTransportListener {
             override fun onConnected() {
                 reconnectAttempts = 0
@@ -52,12 +53,12 @@ class KakuClient internal constructor(
             }
             override fun onMessage(message: String) = handleMessage(message)
             override fun onDisconnected() {
-                if (listenerGeneration != myGeneration) return
+                if (listenerGeneration.get() != myGeneration) return
                 plugins.forEach { it.onDisconnected() }
                 scheduleReconnect()
             }
             override fun onError(error: Throwable) {
-                if (listenerGeneration != myGeneration) return
+                if (listenerGeneration.get() != myGeneration) return
                 plugins.forEach { it.onDisconnected() }
                 scheduleReconnect()
             }

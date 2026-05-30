@@ -142,6 +142,7 @@ class KakuClientTest {
 
         // plugin.onDisconnected() should NOT have been called — stale listener suppressed it
         assertEquals(false, plugin.disconnectedCalled)
+        assertEquals(2, transport.connectCount)  // no extra connect from scheduleReconnect
     }
 }
 
