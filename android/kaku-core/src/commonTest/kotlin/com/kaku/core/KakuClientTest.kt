@@ -121,6 +121,28 @@ class KakuClientTest {
         assertEquals(1, transport.disconnectCount)
         assertEquals(connectsBefore + 1, transport.connectCount)
     }
+
+    @Test
+    fun `stale listener onDisconnected after reconnect does not trigger scheduleReconnect`() {
+        val transport = FakeTransport()
+        val client = KakuClient(transport)
+        val plugin = FakePlugin("network")
+        client.register(plugin)
+        client.startForTest("ws://localhost:8765")
+        transport.simulateConnected()
+
+        // Capture the listener BEFORE reconnect replaces it
+        val oldListener = transport.captureListener()
+
+        transport.simulateMessage("""{"type":"reconnect"}""")
+        // listenerGeneration is now 2; transport.listener points to the new listener
+
+        // Simulate stale onDisconnected from old OkHttp WebSocket
+        oldListener.onDisconnected()
+
+        // plugin.onDisconnected() should NOT have been called — stale listener suppressed it
+        assertEquals(false, plugin.disconnectedCalled)
+    }
 }
 
 internal class FakeTransport : KakuTransport {
@@ -140,6 +162,7 @@ internal class FakeTransport : KakuTransport {
     fun simulateDisconnected() = listener?.onDisconnected()
     fun simulateError(t: Throwable = RuntimeException("network error")) = listener?.onError(t)
     fun simulateMessage(message: String) = listener?.onMessage(message)
+    fun captureListener(): KakuTransportListener = listener!!
 }
 
 internal class FakePlugin(override val id: String) : KakuPlugin {
