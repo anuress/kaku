@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.github.anuress.kaku"
-version = project.property("VERSION_NAME") as String
+version = findProperty("version") as? String ?: project.property("VERSION_NAME") as String
 
 kotlin {
     androidTarget {

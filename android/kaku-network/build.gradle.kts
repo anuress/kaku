@@ -8,6 +8,7 @@ plugins {
 }
 
 group = "com.github.anuress.kaku"
+version = findProperty("version") as? String ?: project.property("VERSION_NAME") as String
 
 android {
     namespace = "com.kaku.network"

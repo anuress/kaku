@@ -3,7 +3,7 @@ name: kaku-android
 on:
   push:
     tags:
-      - "android/v*"
+      - "v*"
 
 jobs:
   publish:
@@ -25,7 +25,7 @@ jobs:
 
       - name: Extract version
         id: version
-        run: echo "version=${GITHUB_REF_NAME#android/}" >> $GITHUB_OUTPUT
+        run: echo "version=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
       - name: Upload kaku-core AAR
         uses: actions/upload-artifact@v4
